@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Resume Analyzer Pro — Next-Gen ATS & Recruiter Persona Lab</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            cyber: {
+              950: '#060813',
+              900: '#0b0e21',
+              850: '#111533',
+              800: '#1a1f4a',
+              accent: '#a855f7',
+              cyan: '#06b6d4',
+              pink: '#ec4899',
+              emerald: '#10b981'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <!-- PDF.js for parsing real PDF uploads directly in the browser -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    if (window.pdfjsLib) {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+  </script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="min-h-screen bg-[#070914] text-slate-100 flex flex-col selection:bg-purple-500 selection:text-white">
+
+  <!-- TOP NAVIGATION BAR -->
+  <header class="border-b border-purple-500/20 bg-[#0a0d20]/80 backdrop-blur-xl sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Brand & Banner-inspired Logo -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
+          <i data-lucide="sparkles" class="w-5 h-5 text-white"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-base font-extrabold tracking-wide uppercase gradient-text-cyber">AI RESUME ANALYZER</span>
+            <span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">PRO v2.4</span>
+          </div>
+          <p class="text-[11px] text-slate-400">Recruiter Personas • 6-Sec Glance • Google XYZ Detox</p>
+        </div>
+      </div>
+
+      <!-- Center: Target Dream Role Selector -->
+      <div class="hidden md:flex items-center gap-2 bg-[#121633] px-3 py-1.5 rounded-xl border border-slate-700/60">
+        <i data-lucide="target" class="w-4 h-4 text-cyan-400"></i>
+        <span class="text-xs text-slate-400">Benchmark Role:</span>
+        <select id="targetJobSelect" class="bg-transparent text-xs text-white font-medium focus:outline-none cursor-pointer">
+          <option value="fullstack-senior" class="bg-slate-900">Senior Full Stack @ Vercel</option>
+          <option value="genai-engineer" class="bg-slate-900">GenAI Systems @ OpenAI</option>
+          <option value="backend-architect" class="bg-slate-900">Backend Architect @ Stripe</option>
+          <option value="product-lead" class="bg-slate-900">Product Designer @ Figma</option>
+        </select>
+      </div>
+
+      <!-- Right Actions: Sound & Export -->
+      <div class="flex items-center gap-2.5">
+        <button id="soundToggleBtn" class="p-2 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 text-purple-300 transition-all border border-slate-700/50" title="Toggle Sound FX">
+          <i data-lucide="volume-2" class="w-4 h-4 text-purple-400"></i>
+        </button>
+
+        <button onclick="switchTab('export');" class="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 text-xs font-semibold border border-purple-500/30 transition-all">
+          <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+          <span>Clean ATS Resume</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN APP CONTAINER -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- LEFT PANEL: RESUME INPUT & PRESETS (5 COLS) -->
+    <section class="lg:col-span-5 flex flex-col gap-4">
+      
+      <!-- Preset Resumes Selector -->
+      <div class="glass-panel p-4 rounded-2xl">
+        <div class="flex items-center justify-between mb-2.5">
+          <span class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+            <i data-lucide="zap" class="w-3.5 h-3.5 text-cyan-400"></i> Instant 1-Click Demos
+          </span>
+          <span class="text-[10px] text-slate-500">Pick any profile to test</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <button class="preset-btn text-left p-2.5 rounded-xl border border-slate-800 hover:border-purple-500/50 bg-[#0d1026] transition-all" data-preset="fullstack-junior">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-200">Alex Rivera</span>
+              <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300">Needs Detox</span>
+            </div>
+            <p class="text-[10px] text-slate-400 truncate mt-0.5">Junior Full Stack Dev</p>
+          </button>
+
+          <button class="preset-btn text-left p-2.5 rounded-xl border border-slate-800 hover:border-purple-500/50 bg-[#0d1026] transition-all" data-preset="ai-lead">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-200">Dr. Sophia Chen</span>
+              <span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300">Elite 90+</span>
+            </div>
+            <p class="text-[10px] text-slate-400 truncate mt-0.5">Senior AI/ML Architect</p>
+          </button>
+
+          <button class="preset-btn text-left p-2.5 rounded-xl border border-slate-800 hover:border-purple-500/50 bg-[#0d1026] transition-all" data-preset="cs-fresh-grad">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-200">Tanvir Hossain</span>
+              <span class="text-[9px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300">Fresh Grad</span>
+            </div>
+            <p class="text-[10px] text-slate-400 truncate mt-0.5">CS Capstone Graduate</p>
+          </button>
+
+          <button class="preset-btn text-left p-2.5 rounded-xl border border-slate-800 hover:border-purple-500/50 bg-[#0d1026] transition-all" data-preset="product-designer">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-200">Maya Lin</span>
+              <span class="text-[9px] px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300">Design</span>
+            </div>
+            <p class="text-[10px] text-slate-400 truncate mt-0.5">Product & UX Designer</p>
+          </button>
+        </div>
+      </div>
+
+      <!-- File Upload Dropzone -->
+      <div id="dropZone" class="glass-panel p-4 rounded-2xl border-dashed border-2 border-slate-700/80 hover:border-purple-500/60 cursor-pointer text-center transition-all group">
+        <input type="file" id="resumeFileInput" accept=".pdf,.docx,.txt" class="hidden">
+        <div class="flex items-center justify-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-purple-500/10 group-hover:bg-purple-500/20 flex items-center justify-center text-purple-400 transition-all">
+            <i data-lucide="upload-cloud" class="w-5 h-5"></i>
+          </div>
+          <div class="text-left">
+            <p class="text-xs font-semibold text-slate-200">Upload PDF, DOCX, or TXT Resume</p>
+            <p id="uploadStatusText" class="text-[11px] text-slate-400">Drag & drop or click to browse files</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Text Editor -->
+      <div class="glass-panel p-4 rounded-2xl flex-1 flex flex-col">
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-slate-300 uppercase tracking-wider">Resume Plaintext Stream</span>
+          </div>
+          <button onclick="document.getElementById('resumeTextInput').value = '';" class="text-[11px] text-slate-400 hover:text-rose-400 transition-colors">
+            Clear
+          </button>
+        </div>
+
+        <textarea id="resumeTextInput" class="w-full flex-1 min-h-[300px] bg-[#090b1c] rounded-xl p-3 text-xs font-mono-code text-slate-200 border border-slate-800 focus:outline-none focus:border-purple-500/50 resize-none leading-relaxed" placeholder="Paste your resume content here or select a demo profile above..."></textarea>
+
+        <button id="runAnalyzeBtn" class="mt-3 w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-purple-600/30 transition-all active:scale-[0.99]">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          <span>Run Deep AI Analysis</span>
+        </button>
+      </div>
+
+    </section>
+
+    <!-- RIGHT PANEL: MULTI-FEATURE AI CENTER (7 COLS) -->
+    <section class="lg:col-span-7 flex flex-col gap-4">
+      
+      <!-- FEATURE TABS NAVIGATION -->
+      <div class="glass-panel p-1.5 rounded-2xl flex items-center gap-1 overflow-x-auto" id="tabNav">
+        <button class="tab-btn px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 shrink-0 border-b-2 border-purple-500 text-purple-300" data-tab="overview">
+          <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i>
+          <span>ATS Overview</span>
+        </button>
+
+        <button class="tab-btn px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 shrink-0 text-slate-400 hover:text-slate-200" data-tab="personas">
+          <i data-lucide="bot" class="w-3.5 h-3.5"></i>
+          <span>Recruiter Council</span>
+        </button>
+
+        <button class="tab-btn px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 shrink-0 text-slate-400 hover:text-slate-200" data-tab="heatmap">
+          <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+          <span>6-Sec Glance</span>
+        </button>
+
+        <button class="tab-btn px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 shrink-0 text-slate-400 hover:text-slate-200" data-tab="detox">
+          <i data-lucide="flask-conical" class="w-3.5 h-3.5"></i>
+          <span>Google XYZ Detox</span>
+        </button>
+
+        <button class="tab-btn px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 shrink-0 text-slate-400 hover:text-slate-200" data-tab="trapcards">
+          <i data-lucide="swords" class="w-3.5 h-3.5"></i>
+          <span>Interview Traps</span>
+        </button>
+
+        <button class="tab-btn px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 shrink-0 text-slate-400 hover:text-slate-200" data-tab="salary">
+          <i data-lucide="banknote" class="w-3.5 h-3.5"></i>
+          <span>Market Worth</span>
+        </button>
+
+        <button class="tab-btn px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 shrink-0 text-slate-400 hover:text-slate-200" data-tab="export">
+          <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+          <span>ATS Clean PDF</span>
+        </button>
+      </div>
+
+      <!-- TAB 1: EXECUTIVE ATS & RADAR OVERVIEW -->
+      <div id="tab-overview" class="tab-content-panel flex flex-col gap-4">
+        
+        <!-- Top Score & Key Indicators Card -->
+        <div class="glass-panel p-5 rounded-2xl grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
+          
+          <!-- Circular Gauge (4 Cols) -->
+          <div class="md:col-span-5 flex flex-col items-center justify-center text-center border-b md:border-b-0 md:border-r border-slate-800 pb-4 md:pb-0 md:pr-4">
+            <div class="relative w-32 h-32 flex items-center justify-center">
+              <svg class="w-32 h-32" viewBox="0 0 100 100">
+                <!-- Track -->
+                <circle cx="50" cy="50" r="45" stroke="#1e293b" stroke-width="8" fill="transparent"></circle>
+                <!-- Gauge Progress -->
+                <circle id="atsGaugeCircle" class="gauge-circle" cx="50" cy="50" r="45" stroke="#a855f7" stroke-width="8" stroke-linecap="round" fill="transparent"></circle>
+              </svg>
+              <div class="absolute flex flex-col items-center">
+                <span id="atsScoreValue" class="text-4xl font-black tracking-tight text-white">0</span>
+                <span class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">ATS Score</span>
+              </div>
+            </div>
+
+            <h3 id="candidateHeaderName" class="text-sm font-bold text-slate-200 mt-2">Candidate</h3>
+            <p id="atsVerdictText" class="text-[11px] text-slate-400 mt-1">Analyzing criteria...</p>
+          </div>
+
+          <!-- Quick Metrics Grid (7 Cols) -->
+          <div class="md:col-span-7 grid grid-cols-2 gap-3">
+            <div class="bg-[#0b0e24] p-3 rounded-xl border border-slate-800/80">
+              <span class="text-[10px] text-slate-400 uppercase font-semibold flex items-center gap-1">
+                <i data-lucide="hash" class="w-3 h-3 text-cyan-400"></i> Quantified Metrics
+              </span>
+              <p id="statMetricsCount" class="text-xl font-bold text-cyan-300 mt-1">0</p>
+              <span class="text-[10px] text-slate-500">Numbers, %, $ detected</span>
+            </div>
+
+            <div class="bg-[#0b0e24] p-3 rounded-xl border border-slate-800/80">
+              <span class="text-[10px] text-slate-400 uppercase font-semibold flex items-center gap-1">
+                <i data-lucide="zap" class="w-3 h-3 text-purple-400"></i> Power Action Verbs
+              </span>
+              <p id="statVerbsCount" class="text-xl font-bold text-purple-300 mt-1">0</p>
+              <span class="text-[10px] text-slate-500">Strong execution verbs</span>
+            </div>
+
+            <div class="bg-[#0b0e24] p-3 rounded-xl border border-slate-800/80">
+              <span class="text-[10px] text-slate-400 uppercase font-semibold flex items-center gap-1">
+                <i data-lucide="flame" class="w-3 h-3 text-rose-400"></i> Fluff Buzzwords
+              </span>
+              <p id="statBuzzwordsCount" class="text-xl font-bold text-rose-400 mt-1">0</p>
+              <span class="text-[10px] text-slate-500">Empty passive cliches</span>
+            </div>
+
+            <div class="bg-[#0b0e24] p-3 rounded-xl border border-slate-800/80">
+              <span class="text-[10px] text-slate-400 uppercase font-semibold flex items-center gap-1">
+                <i data-lucide="cpu" class="w-3 h-3 text-emerald-400"></i> Technical Keywords
+              </span>
+              <p id="statSkillsCount" class="text-xl font-bold text-emerald-300 mt-1">0</p>
+              <span class="text-[10px] text-slate-500">Verified stack ontology</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Radar Chart & Target Job Match Section -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+          <!-- Radar Chart (6 Cols) -->
+          <div class="md:col-span-6 glass-panel p-4 rounded-2xl flex flex-col">
+            <span class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <i data-lucide="compass" class="w-3.5 h-3.5 text-purple-400"></i> 5-Axis Candidate Radar
+            </span>
+            <div class="relative w-full h-[220px]">
+              <canvas id="skillsRadarChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Job Match Gap (6 Cols) -->
+          <div class="md:col-span-6 glass-panel p-4 rounded-2xl flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <i data-lucide="check-check" class="w-3.5 h-3.5 text-cyan-400"></i> Benchmark Role Alignment
+                </span>
+                <span id="jobMatchRateText" class="text-sm font-black text-cyan-400">0%</span>
+              </div>
+
+              <!-- Matched -->
+              <p class="text-[11px] text-slate-400 mb-1.5 font-medium">Matched Qualifications:</p>
+              <div id="matchedKeywordsList" class="flex flex-wrap gap-1.5 mb-3 max-h-[85px] overflow-y-auto">
+                <span class="text-xs text-slate-500">Analyzing...</span>
+              </div>
+
+              <!-- Missing -->
+              <p class="text-[11px] text-slate-400 mb-1.5 font-medium flex items-center gap-1">
+                <i data-lucide="alert-circle" class="w-3 h-3 text-rose-400"></i> High-Priority Missing Keywords (Boost ATS):
+              </p>
+              <div id="missingKeywordsList" class="flex flex-wrap gap-1.5 max-h-[85px] overflow-y-auto">
+                <span class="text-xs text-slate-500">Analyzing...</span>
+              </div>
+            </div>
+
+            <p class="text-[10px] text-slate-500 mt-2 italic">* Click any missing keyword to view placement guidance.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: RECRUITER PERSONA COUNCIL -->
+      <div id="tab-personas" class="tab-content-panel hidden flex flex-col gap-4">
+        
+        <!-- Persona Selectors -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <button class="persona-tab-btn p-3 rounded-xl border border-purple-500 bg-purple-950/40 text-left transition-all" data-persona="bob">
+            <div class="text-xl mb-1">😼</div>
+            <p class="text-xs font-bold text-slate-100">Savage Bob</p>
+            <p class="text-[10px] text-slate-400">FAANG Tech Lead</p>
+          </button>
+
+          <button class="persona-tab-btn p-3 rounded-xl border border-slate-800 text-left transition-all" data-persona="lumi">
+            <div class="text-xl mb-1">🌸</div>
+            <p class="text-xs font-bold text-slate-100">Fairy Lumi</p>
+            <p class="text-[10px] text-slate-400">Career Cheerleader</p>
+          </button>
+
+          <button class="persona-tab-btn p-3 rounded-xl border border-slate-800 text-left transition-all" data-persona="vance">
+            <div class="text-xl mb-1">👔</div>
+            <p class="text-xs font-bold text-slate-100">Agent Vance</p>
+            <p class="text-[10px] text-slate-400">Enterprise ATS Bot</p>
+          </button>
+
+          <button class="persona-tab-btn p-3 rounded-xl border border-slate-800 text-left transition-all" data-persona="jax">
+            <div class="text-xl mb-1">🦄</div>
+            <p class="text-xs font-bold text-slate-100">Founder Jax</p>
+            <p class="text-[10px] text-slate-400">YC Startup Hustler</p>
+          </button>
+        </div>
+
+        <!-- Voice Narration & Audio Waveform Banner -->
+        <div class="glass-panel p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 border border-purple-500/20">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-pink-500/10 flex items-center justify-center text-pink-400">
+              <i data-lucide="mic" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h4 class="text-xs font-bold text-slate-200">AI Recruiter Voice Verdict</h4>
+              <p class="text-[10px] text-slate-400">Hear the current persona speak their review out loud</p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3 w-full sm:w-auto">
+            <!-- Audio Waveform Canvas -->
+            <canvas id="vibeWaveformCanvas" class="w-36 h-8 rounded bg-slate-900/60"></canvas>
+
+            <button id="vibeAudioPlayBtn" class="px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-purple-600/30 transition-all shrink-0">
+              <i data-lucide="play" class="w-4 h-4"></i>
+              <span>Listen to AI Voice</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Persona View: Savage Bob -->
+        <div id="persona-bob" class="persona-card-view glass-panel p-6 rounded-2xl border border-rose-500/20">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-2xl bg-rose-500/10 flex items-center justify-center text-2xl">😼</div>
+              <div>
+                <h3 class="text-sm font-bold text-slate-100">Savage Bob’s Uncensored Roast</h3>
+                <span id="bobToneBadge" class="text-xs font-medium text-rose-400">Skeptical & Smirking</span>
+              </div>
+            </div>
+            <span id="bobBrutalityScore" class="px-3 py-1 rounded-full bg-rose-500/10 text-rose-300 border border-rose-500/20 text-xs font-bold">
+              80% Brutality
+            </span>
+          </div>
+
+          <blockquote id="bobQuoteText" class="text-xs leading-relaxed text-slate-300 italic border-l-2 border-rose-500 pl-4 py-1 mb-4 font-mono-code bg-slate-900/40 p-3 rounded-r-xl">
+            "Loading roast critique..."
+          </blockquote>
+
+          <div class="bg-rose-950/20 border border-rose-500/20 rounded-xl p-3 flex items-start gap-2.5">
+            <i data-lucide="alert-octagon" class="w-4 h-4 text-rose-400 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="text-xs font-bold text-rose-300">Bob's Bottom-Line Verdict:</span>
+              <p id="bobVerdictText" class="text-xs text-slate-300 mt-0.5 font-medium">Analyzing...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Persona View: Fairy Lumi -->
+        <div id="persona-lumi" class="persona-card-view hidden glass-panel p-6 rounded-2xl border border-pink-500/20">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-2xl bg-pink-500/10 flex items-center justify-center text-2xl">🌸</div>
+              <div>
+                <h3 class="text-sm font-bold text-slate-100">Fairy Lumi’s Career Encouragement</h3>
+                <span class="text-xs font-medium text-pink-400">Your Personal Cheerleader</span>
+              </div>
+            </div>
+            <span id="lumiHappinessScore" class="px-3 py-1 rounded-full bg-pink-500/10 text-pink-300 border border-pink-500/20 text-xs font-bold">
+              95% Joy
+            </span>
+          </div>
+
+          <p id="lumiAffirmationText" class="text-xs leading-relaxed text-pink-100 mb-4 bg-pink-950/20 border border-pink-500/20 p-4 rounded-xl">
+            "Loading sweet encouragement..."
+          </p>
+
+          <div>
+            <span class="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-2">Unlocked Career Badges:</span>
+            <div id="lumiBadgesContainer" class="flex flex-wrap gap-2"></div>
+          </div>
+        </div>
+
+        <!-- Persona View: Agent Vance -->
+        <div id="persona-vance" class="persona-card-view hidden glass-panel p-6 rounded-2xl border border-cyan-500/20">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 flex items-center justify-center text-2xl">👔</div>
+              <div>
+                <h3 class="text-sm font-bold text-slate-100">Agent Vance (Enterprise ATS Sentinel v4.9)</h3>
+                <span class="text-xs font-medium text-cyan-400">Deterministic Parser Simulation</span>
+              </div>
+            </div>
+            <span id="vanceMatchStatus" class="px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 text-xs font-mono-code font-bold">
+              PASS
+            </span>
+          </div>
+
+          <div class="space-y-3 text-xs font-mono-code">
+            <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+              <span class="text-cyan-400 font-bold block mb-1">▶ PARSER_STREAM_INTEGRITY:</span>
+              <p id="vanceParseability" class="text-slate-300">Checking document tokens...</p>
+            </div>
+
+            <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+              <span class="text-purple-400 font-bold block mb-1">▶ SECTION_STRUCTURE_AUDIT:</span>
+              <p id="vanceIntegrity" class="text-slate-300">Auditing heading anchors...</p>
+            </div>
+
+            <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+              <span class="text-emerald-400 font-bold block mb-1">▶ ATS_RECOMMENDATION:</span>
+              <p id="vanceRecommendation" class="text-slate-300">Calculating rank weight...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Persona View: Founder Jax -->
+        <div id="persona-jax" class="persona-card-view hidden glass-panel p-6 rounded-2xl border border-purple-500/20">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-2xl bg-purple-500/10 flex items-center justify-center text-2xl">🦄</div>
+              <div>
+                <h3 class="text-sm font-bold text-slate-100">Founder Jax’s Startup Hustle Metric</h3>
+                <span class="text-xs font-medium text-purple-400">Zero-to-One Shipping Potential</span>
+              </div>
+            </div>
+            <span id="jaxVibeScore" class="px-3 py-1 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/20 text-xs font-bold">
+              88/100
+            </span>
+          </div>
+
+          <blockquote id="jaxTakeText" class="text-xs leading-relaxed text-slate-300 italic border-l-2 border-purple-500 pl-4 py-2 bg-purple-950/20 p-3 rounded-r-xl">
+            "Evaluating builder energy..."
+          </blockquote>
+        </div>
+
+      </div>
+
+      <!-- TAB 3: 6-SECOND RECRUITER GLANCE & EYE-TRACKING HEATMAP -->
+      <div id="tab-heatmap" class="tab-content-panel hidden flex flex-col gap-4">
+        <div class="glass-panel p-5 rounded-2xl">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+            <div>
+              <h3 class="text-sm font-bold text-slate-100 flex items-center gap-2">
+                <i data-lucide="eye" class="w-4 h-4 text-cyan-400"></i>
+                <span>6-Second Human Recruiter Gaze Simulation</span>
+              </h3>
+              <p class="text-xs text-slate-400">Scientific F-pattern eye tracking reproduction on your resume</p>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <span id="heatmapCountdown" class="text-xs font-mono-code font-bold text-cyan-400 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800">
+                0.0s / 6.2s
+              </span>
+              <button id="playHeatmapBtn" class="px-4 py-2 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-pink-600/30 transition-all">
+                <i data-lucide="play" class="w-3.5 h-3.5"></i>
+                <span>Play 6-Sec Gaze</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Heatmap Canvas Container -->
+          <div class="relative w-full h-[360px] bg-slate-950 rounded-xl overflow-hidden border border-slate-800 flex items-center justify-center">
+            <canvas id="heatmapCanvas" class="w-full h-full"></canvas>
+            
+            <!-- Live Action Badge overlay -->
+            <div class="absolute bottom-3 left-3 right-3 bg-slate-900/90 backdrop-blur-md border border-slate-700/60 p-2.5 rounded-xl flex items-center justify-between text-xs">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-pink-500 animate-ping"></span>
+                <span id="heatmapStatusLabel" class="text-slate-200 font-medium">Ready to simulate recruiter cognitive path</span>
+              </div>
+              <div class="flex items-center gap-2 text-[10px] text-slate-400">
+                <span class="inline-block w-2.5 h-2.5 rounded-full bg-red-500"></span> Focus Hotspot
+                <span class="inline-block w-2.5 h-2.5 rounded-full bg-cyan-400"></span> Skim Zone
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: BUZZWORD DETOXIFIER & GOOGLE XYZ FORMULA -->
+      <div id="tab-detox" class="tab-content-panel hidden flex flex-col gap-4">
+        <div class="glass-panel p-5 rounded-2xl">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="text-sm font-bold text-slate-100 flex items-center gap-2">
+                <i data-lucide="flask-conical" class="w-4 h-4 text-purple-400"></i>
+                <span>Buzzword Detoxifier & Google XYZ Formula</span>
+              </h3>
+              <p class="text-xs text-slate-400">Transform passive duty lists into elite quantified achievement statements</p>
+            </div>
+            <span class="px-2.5 py-1 rounded bg-purple-500/10 text-purple-300 text-xs font-semibold border border-purple-500/20">
+              XYZ Formula Engine
+            </span>
+          </div>
+
+          <div id="detoxifierContainer" class="flex flex-col gap-3">
+            <p class="text-xs text-slate-400">Run analysis to scan for buzzwords...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 5: RECRUITER TRAP CARDS FLASHGAME -->
+      <div id="tab-trapcards" class="tab-content-panel hidden flex flex-col gap-4">
+        <div class="glass-panel p-5 rounded-2xl">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="text-sm font-bold text-slate-100 flex items-center gap-2">
+                <i data-lucide="swords" class="w-4 h-4 text-amber-400"></i>
+                <span>Recruiter Trap Cards (Mock Interview Griller)</span>
+              </h3>
+              <p class="text-xs text-slate-400">AI predicts the 4 toughest questions you will face based on your resume's weaknesses</p>
+            </div>
+            <span class="text-[11px] text-slate-400">Interactive 3D Flashcards</span>
+          </div>
+
+          <div id="trapCardsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <p class="text-xs text-slate-400">Run analysis to generate tailored trap questions...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 6: MARKET SALARY & POWER GAUGE -->
+      <div id="tab-salary" class="tab-content-panel hidden flex flex-col gap-4">
+        <div class="glass-panel p-6 rounded-2xl">
+          <div class="flex items-center justify-between mb-5">
+            <div>
+              <h3 class="text-sm font-bold text-slate-100 flex items-center gap-2">
+                <i data-lucide="banknote" class="w-4 h-4 text-emerald-400"></i>
+                <span>Market Compensation & Negotiation Leverage</span>
+              </h3>
+              <p class="text-xs text-slate-400">Estimated value bracket calculated from tech stack scarcity and impact density</p>
+            </div>
+            <span id="salaryTierBadge" class="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 text-xs font-bold">
+              Competitive Bracket
+            </span>
+          </div>
+
+          <!-- Numbers Display -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div class="bg-slate-900/80 p-4 rounded-xl border border-emerald-500/30">
+              <span class="text-[10px] uppercase font-bold text-emerald-400">Global US Benchmark (Annual)</span>
+              <p id="salaryRangeDisplay" class="text-2xl font-black text-white mt-1">$90k - $130k USD</p>
+              <span class="text-[11px] text-slate-400">Remote / International contracting range</span>
+            </div>
+
+            <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700">
+              <span class="text-[10px] uppercase font-bold text-cyan-400">Local Benchmark Equivalent</span>
+              <p id="salaryBdtDisplay" class="text-2xl font-black text-cyan-300 mt-1">৳18L - ৳26L / yr</p>
+              <span class="text-[11px] text-slate-400">Based on senior engineer tier in region</span>
+            </div>
+          </div>
+
+          <!-- Value Add Roadmap -->
+          <div class="bg-purple-950/20 border border-purple-500/20 p-4 rounded-xl">
+            <h4 class="text-xs font-bold text-purple-300 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> High-Leverage Actions to Bump Your Bracket:
+            </h4>
+            <ul id="salaryBoostTips" class="space-y-2 mt-2">
+              <li class="text-xs text-slate-400">Analyzing roadmap...</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 7: ATS CLEAN RESUME & PDF EXPORTER -->
+      <div id="tab-export" class="tab-content-panel hidden flex flex-col gap-4">
+        <div class="glass-panel p-5 rounded-2xl">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+            <div>
+              <h3 class="text-sm font-bold text-slate-100 flex items-center gap-2">
+                <i data-lucide="file-check" class="w-4 h-4 text-emerald-400"></i>
+                <span>ATS-Compliant Clean Layout Builder</span>
+              </h3>
+              <p class="text-xs text-slate-400">Single-column, zero parsing hurdles, 100% human & robot readable</p>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button onclick="window.resumeExporter.printResume();" class="px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-purple-600/30 transition-all">
+                <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+                <span>Print / Save as PDF</span>
+              </button>
+
+              <button onclick="window.resumeExporter.copyMarkdown(document.getElementById('resumeTextInput').value);" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-1.5 border border-slate-700 transition-all">
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                <span>Copy Text</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Document Sheet Container -->
+          <div id="atsExportPreviewContainer" class="bg-slate-900/60 p-4 rounded-xl border border-slate-800 overflow-x-auto">
+            <p class="text-xs text-slate-400 text-center py-8">Generate an analysis to view ATS-compliant clean preview.</p>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-purple-500/10 py-4 bg-[#060814] text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <p>AI Resume Analyzer Pro • Multi-Persona Cognitive Screening Engine</p>
+      <div class="flex items-center gap-3 text-[11px]">
+        <span class="text-emerald-400">● 100% Client-Side Privacy (Zero data saved)</span>
+        <span>•</span>
+        <span class="text-purple-400">Google XYZ Formula Integrated</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Application Scripts -->
+  <script src="js/soundEngine.js"></script>
+  <script src="js/presets.js"></script>
+  <script src="js/heatmap.js"></script>
+  <script src="js/speech.js"></script>
+  <script src="js/exportPdf.js"></script>
+  <script src="js/analyzer.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

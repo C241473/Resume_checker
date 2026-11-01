@@ -1,0 +1,12 @@
+{
+  "name": "ai-resume-analyzer-pro",
+  "version": "1.0.0",
+  "description": "Ultra-modern, Cute & Uncommon AI Resume Analyzer with Recruiter Personas, 6-Sec Glance Heatmap, Detoxifier and Mock Griller",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": ["ai", "resume-analyzer", "ats", "career"],
+  "author": "Antigravity",
+  "license": "MIT"
+}
